@@ -5,7 +5,7 @@
       "name": "3DS: Build & Run in Emu",
       "type": "cppvsdbg", // cppdbg : C++ (GDB/LLDB)
       "request": "launch",
-      "program": "C:\\path\\to\\3DS\\emulator\\such\\as\\azahar.exe",
+      "program": "C:\\Program Files\\Azahar\\azahar.exe",
       "args": [
         "${workspaceFolderBasename}.3dsx"
       ],
