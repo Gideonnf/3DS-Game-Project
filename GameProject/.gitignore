@@ -1,0 +1,17 @@
+# Compiled Object files and build cache
+build/
+
+# 3DS Executables and Binaries
+*.elf
+*.3dsx
+*.smdh
+*.cia
+*.map
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# VS Code (Optional)
+# Uncomment the line below if you don't want to share your local VS Code settings
+# .vscode/

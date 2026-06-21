@@ -1,6 +1,7 @@
 #include <3ds.h>
 #include <stdio.h>
 #include "Core/Timer.hpp"
+#include "Core/InputManager.hpp"
 
 int main(int argc, char **argv)
 {
@@ -23,13 +24,11 @@ int main(int argc, char **argv)
 	while (aptMainLoop())
 	{
 		timeManager.Tick();
-		//Scan all the inputs. This should be done once for each frame
-		hidScanInput();
+		
+		InputManager::GetInstance()->Update(timeManager.GetDeltaTime());
 
-		//hidKeysDown returns information about which buttons have been just pressed (and they weren't in the previous frame)
-		u32 kDown = hidKeysDown();
-
-		if (kDown & KEY_START) break; // break in order to return to hbmenu
+		// break in order to return to hbmenu
+		if (InputManager::GetInstance()->GetKeyDown() & KEY_START) break; 
 
 		// Flush and swap framebuffers
 		gfxFlushBuffers();

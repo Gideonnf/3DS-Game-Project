@@ -87,7 +87,9 @@ main.o: \
  C:/devkitPro/libctru/include/3ds/font.h \
  C:/devkitPro/libctru/include/3ds/gdbhio_dev.h \
  C:/devkitPro/libctru/include/3ds/3dslink.h \
- C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/Timer.hpp
+ C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/Timer.hpp \
+ C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/InputManager.hpp \
+ C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Singleton.hpp
 C:/devkitPro/libctru/include/3ds.h:
 C:/devkitPro/libctru/include/3ds/types.h:
 C:/devkitPro/libctru/include/3ds/result.h:
@@ -176,3 +178,5 @@ C:/devkitPro/libctru/include/3ds/font.h:
 C:/devkitPro/libctru/include/3ds/gdbhio_dev.h:
 C:/devkitPro/libctru/include/3ds/3dslink.h:
 C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/Timer.hpp:
+C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/InputManager.hpp:
+C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Singleton.hpp:
