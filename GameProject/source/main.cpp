@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 	while (aptMainLoop())
 	{
 		timeManager.Tick();
-		
+
 		InputManager::GetInstance()->Update(timeManager.GetDeltaTime());
 
 		// break in order to return to hbmenu
