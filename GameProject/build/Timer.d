@@ -1,5 +1,6 @@
-main.o: \
- C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/main.cpp \
+Timer.o: \
+ C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/Timer.cpp \
+ C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/Timer.hpp \
  C:/devkitPro/libctru/include/3ds.h \
  C:/devkitPro/libctru/include/3ds/types.h \
  C:/devkitPro/libctru/include/3ds/result.h \
@@ -86,8 +87,8 @@ main.o: \
  C:/devkitPro/libctru/include/3ds/romfs.h \
  C:/devkitPro/libctru/include/3ds/font.h \
  C:/devkitPro/libctru/include/3ds/gdbhio_dev.h \
- C:/devkitPro/libctru/include/3ds/3dslink.h \
- C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/Timer.hpp
+ C:/devkitPro/libctru/include/3ds/3dslink.h
+C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/Timer.hpp:
 C:/devkitPro/libctru/include/3ds.h:
 C:/devkitPro/libctru/include/3ds/types.h:
 C:/devkitPro/libctru/include/3ds/result.h:
@@ -175,4 +176,3 @@ C:/devkitPro/libctru/include/3ds/romfs.h:
 C:/devkitPro/libctru/include/3ds/font.h:
 C:/devkitPro/libctru/include/3ds/gdbhio_dev.h:
 C:/devkitPro/libctru/include/3ds/3dslink.h:
-C:/Users/gideo/Documents/PersonalProjects/3DSGame/GameProject/source/Core/Timer.hpp:

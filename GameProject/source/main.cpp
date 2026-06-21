@@ -1,5 +1,6 @@
 #include <3ds.h>
 #include <stdio.h>
+#include "Core/Timer.hpp"
 
 int main(int argc, char **argv)
 {
@@ -16,9 +17,12 @@ int main(int argc, char **argv)
 
 	printf("\x1b[25;16HPress Start to exit.");
 
+	Timer timeManager;
+
 	// Main loop
 	while (aptMainLoop())
 	{
+		timeManager.Tick();
 		//Scan all the inputs. This should be done once for each frame
 		hidScanInput();
 
