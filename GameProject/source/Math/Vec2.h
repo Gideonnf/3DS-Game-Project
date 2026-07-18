@@ -2,6 +2,7 @@
 #define VEC_2_H
 #include <cmath>
 #include <iostream>
+#include <cfloat>
 
 const float PI = 3.14159265358979323846f;
 
@@ -122,23 +123,23 @@ public:
 // Binary operators
 template<typename T> Vector2D<T> operator + (const Vector2D<T>& lhs, const Vector2D<T>& rhs)
 {
-	return Vector2D (lhs.x + rhs.x, lhs.y + rhs.y);
+	return Vector2D<T>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 template<typename T> Vector2D<T> operator - (const Vector2D<T>& lhs, const Vector2D<T>& rhs)
 {
-	return Vector2D(lhs.x - rhs.x, lhs.y - rhs.y);
+	return Vector2D<T>(lhs.x - rhs.x, lhs.y - rhs.y);
 }
 template<typename T> Vector2D<T> operator * (const Vector2D<T>& lhs, T rhs)
 {
-	return Vector2D(lhs.x * rhs, lhs.y * rhs);
+	return Vector2D<T>(lhs.x * rhs, lhs.y * rhs);
 }
 template<typename T> Vector2D<T> operator * (T lhs, const Vector2D<T>& rhs)
 {
-	return Vector2D(rhs.x * lhs, rhs.y * lhs);
+	return Vector2D<T>(rhs.x * lhs, rhs.y * lhs);
 }
 template<typename T> Vector2D<T> operator * (const Vector2D<T>& lhs, const Vector2D<T>& rhs)
 {
-	return Vector2D(lhs.x * rhs.x, lhs.y * rhs.y);
+	return Vector2D<T>(lhs.x * rhs.x, lhs.y * rhs.y);
 }
 
 template<typename T> Vector2D<T> operator / (const Vector2D<T>& lhs, T rhs)
@@ -147,7 +148,7 @@ template<typename T> Vector2D<T> operator / (const Vector2D<T>& lhs, T rhs)
 	{
 		throw std::domain_error("Division by zero");
 	}
-	return Vector2D(lhs.x / rhs, lhs.y / rhs);
+	return Vector2D<T>(lhs.x / rhs, lhs.y / rhs);
 }
 
 // Normalise
@@ -203,7 +204,7 @@ template<typename T> T Vector2DCrossProductMag(const Vector2D<T>& pVec0, const V
 
 template<typename T> T Vector2DDistance(const Vector2D<T>& pVec0, const Vector2D<T>& pVec1)
 {
-	Vector2D DistanceVector = pVec1 - pVec0;
+	Vector2D<T> DistanceVector = pVec1 - pVec0;
 
 	T distance = Vector2DLength(DistanceVector);
 
