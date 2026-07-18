@@ -27,6 +27,35 @@ const unsigned int MAX_ENTITIES = 10000;
 
 // use an 8 bit int since there wont be that many components created
 using ComponentID = std::uint8_t;
+using SystemID = std::uint8_t;
+
+inline ComponentID GetUniqueComponentID()
+{
+	static ComponentID lastID = 0u;
+	return lastID++;
+}
+
+template <typename T>
+inline ComponentID GetComponentTypeID() noexcept
+{
+	static ComponentID typeID = GetUniqueComponentID();
+	return typeID;
+}
+
+inline SystemID GetUniqueSystemID()
+{
+	static SystemID lastID = 0u;
+	return lastID++;
+}
+
+template <typename T>
+inline SystemID GetSystemTypeID() noexcept
+{
+	static SystemID typeID = GetUniqueSystemID();
+	return typeID;
+}
+
+
 
 // For now, set the max number of components to 32
 const std::uint8_t MAX_COMPONENTS = 32;

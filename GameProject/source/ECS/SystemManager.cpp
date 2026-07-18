@@ -17,53 +17,54 @@ DigiPen Institute of Technology is prohibited.
 #include "SystemManager.h"
 #include "ComponentManager.h"
 #include "EntityManager.h"
-	void SystemManager::EntityDestroyed(Entity entity)
+#include <algorithm>
+
+void SystemManager::EntityDestroyed(Entity entity)
+{
+	for (auto const& pair : mSystems)
 	{
-		std::unordered_map<std::string, std::shared_ptr<BaseSystem>>::iterator iSystemIterator = mSystems.begin();
-		for (; iSystemIterator != mSystems.end(); ++iSystemIterator)
+		auto& entities = pair.second->mEntitiesSet;
+		auto it = std::find(entities.begin(), entities.end(), entity);
+		if (it != entities.end())
 		{
-			// It exist within that system's entity set
-			if (iSystemIterator->second->mEntitiesSet.count(entity) != 0)
-			{
-				iSystemIterator->second->EntityDestroyed(entity);
-				iSystemIterator->second->mEntitiesSet.erase(entity);
-			}
-		}
-
-
-		EntityManager::GetInstance()->DeleteEntity(entity);
-		ComponentManager::GetInstance()->EntityDestroyed(entity);
-	}
-
-	void SystemManager::UpdateSignatures(Entity entity, Signature entitySignature)
-	{
-		for (auto const& pair : mSystems)
-		{
-			// Get the name and system from mSystems
-			auto const& name = pair.first;
-			auto const& system = pair.second;
-			// Get the system's signature
-			auto const& systemSignature = mSystemSignatures[name];
-
-			// Check if the entities signature matches the system's
-			if ((entitySignature & systemSignature) == systemSignature) // bit comparison 
-			{
-				// Just incase it adds more than once, dont let it lmao
-				if (system->mEntitiesSet.count(entity) == 0)
-				{
-					system->mEntitiesSet.insert(entity);
-					system->EntityAdded(entity);
-				}
-			}
-			else
-			{
-				// erase it from the system's signature if it exist within the entities set
-				if (system->mEntitiesSet.find(entity) != system->mEntitiesSet.end())
-				{
-					system->mEntitiesSet.erase(entity);
-					system->EntityRemoved(entity);
-				}
-			}
+			pair.second->EntityDestroyed(entity);
+			*it = entities.back();
+			entities.pop_back();
 		}
 	}
-
+
+	EntityManager::GetInstance()->DeleteEntity(entity);
+	ComponentManager::GetInstance()->EntityDestroyed(entity);
+}
+
+void SystemManager::UpdateSignatures(Entity entity, Signature entitySignature)
+{
+	for (auto const& pair : mSystems)
+	{
+		auto const& id = pair.first;
+		auto const& system = pair.second;
+		auto const& systemSignature = mSystemSignatures[id];
+
+		// Check if the entities signature matches the system's
+		if ((entitySignature & systemSignature) == systemSignature) // bit comparison 
+		{
+			auto& entities = system->mEntitiesSet;
+			if (std::find(entities.begin(), entities.end(), entity) == entities.end())
+			{
+				system->mEntitiesSet.push_back(entity);
+				system->EntityAdded(entity);
+			}
+		}
+		else
+		{
+			auto& entities = system->mEntitiesSet;
+			auto it = std::find(entities.begin(), entities.end(), entity);
+			if (it != entities.end())
+			{
+				*it = entities.back();
+				entities.pop_back();
+				system->EntityRemoved(entity);
+			}
+		}
+	}
+}

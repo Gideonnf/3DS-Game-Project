@@ -43,10 +43,12 @@ private:
 	std::vector<T> m_ComponentArray;
 
 	// Map for an entity ID to a component
-	std::unordered_map<Entity, unsigned int> m_EntityToComponent;
+	//std::unordered_map<Entity, unsigned int> m_EntityToComponent;
+	std::vector<Entity> m_ComponentToEntity;
 
 	// Map a component to an entity
-	std::unordered_map<unsigned int, Entity> m_ComponentToEntity;
+	//std::unordered_map<unsigned int, Entity> m_ComponentToEntity;
+	std::array<unsigned int, MAX_ENTITIES> m_EntityToComponent;
 
 	// Keep track of the active components
 	//unsigned int m_Size{};
@@ -63,6 +65,8 @@ public:
 	{
 		// Reserve memory for the component array to allow for continous memory
 		m_ComponentArray.reserve(MAX_ENTITIES);
+		m_ComponentToEntity.reserve(MAX_ENTITIES);
+		m_EntityToComponent.fill(MAX_ENTITIES);
 	}
 
 	/*!*************************************************************************
@@ -87,12 +91,14 @@ public:
 		unsigned int componentIndex = (unsigned int)m_ComponentArray.size();
 
 		// Set the map variables
+		// m_EntityToComponent[entity] = componentIndex;
+		// m_ComponentToEntity[componentIndex] = entity;
 		m_EntityToComponent[entity] = componentIndex;
-		m_ComponentToEntity[componentIndex] = entity;
+		m_ComponentToEntity.push_back(entity);
 
 		// Store the component data into the array
 		//m_ComponentArray[componentIndex] = component;
-		m_ComponentArray.emplace_back(component);
+		m_ComponentArray.push_back(component);
 
 		// increment size to ensure its always the latest number
 		//m_Size++;
@@ -108,6 +114,8 @@ public:
 	***************************************************************************/
 	void RemoveComponentData(Entity entity)
 	{
+		assert(m_EntityToComponent[entity] != MAX_ENTITIES && "Entity does not contain this component");
+
 		// Get the last active index and the entity to delete index
 		unsigned int lastValidIndex = (unsigned int)m_ComponentArray.size() - 1;
 		// get the component index related to the entity thats being removed
@@ -120,18 +128,14 @@ public:
 		// pop back the last element after swapping to maintain size
 		m_ComponentArray.pop_back();
 
-		// Update the maps
-		// Get the entity related to the last active component
+		// Update dense-to-entity mapping
 		Entity lastValidEntity = m_ComponentToEntity[lastValidIndex];
-		// Map the last valid entity to the component index as it holds the data of the last entity after swapping above
-		m_EntityToComponent[lastValidEntity] = componentIndex;
-		// Change the component index to contain the last valid entity  as the old one is deleted now
 		m_ComponentToEntity[componentIndex] = lastValidEntity;
+		m_ComponentToEntity.pop_back();
 
-		// erase the old ones from the maps
-		m_EntityToComponent.erase(entity);
-		// Last valid index now holds a copy of the last valid entity data after shifting, so we have to erase it
-		m_ComponentToEntity.erase(lastValidIndex);
+		// Update sparse mapping
+		m_EntityToComponent[lastValidEntity] = componentIndex;
+		m_EntityToComponent[entity] = MAX_ENTITIES; // Reset
 
 		// Decrement size as the last valid index is now free to be used
 		//m_Size--;
@@ -149,7 +153,7 @@ public:
 	***************************************************************************/
 	T& GetComponentData(Entity entity)
 	{
-		assert(m_EntityToComponent.count(entity) != 0 && "Entity does not contain this component");
+		assert(m_EntityToComponent[entity] != MAX_ENTITIES && "Entity does not contain this component");
 
 		return m_ComponentArray[m_EntityToComponent[entity]];
 	}
@@ -168,9 +172,8 @@ public:
 	***************************************************************************/
 	bool HasComponentData(Entity entity)
 	{
-		// If component has this entity, count would return as 1
-		// if not it would return as 0
-		return m_EntityToComponent.count(entity);
+		// If component has this entity, check if sparse index is valid
+		return m_EntityToComponent[entity] != MAX_ENTITIES;
 	}
 
 	/*!*************************************************************************
@@ -186,19 +189,8 @@ public:
 	***************************************************************************/
 	void CloneComponentData(Entity entityToClone, Entity newEntity)
 	{
-		// Get the next component index
-		unsigned int componentIndex = (unsigned int)m_ComponentArray.size();
-		// Create a copy of the component data
-		T componentData = m_ComponentArray[m_EntityToComponent[entityToClone]];
-		
-		// Set the map
-		m_EntityToComponent[newEntity] = componentIndex;
-		m_ComponentToEntity[componentIndex] = newEntity;
-
-		std::string type = typeid(T).name();
-
-		// place a copy of the clone component data to the back
-		m_ComponentArray.emplace_back(componentData);
+		T componentData = GetComponentData(entityToClone);
+		InsertComponentData(newEntity, componentData);
 	}
 
 	/*!*************************************************************************
@@ -212,7 +204,7 @@ public:
 	void EntityDestroyed(Entity entity) override
 	{
 		// If the entity exist within this component
-		if (m_EntityToComponent.find(entity) != m_EntityToComponent.end())
+		if (HasComponentData(entity))
 		{
 			// Remove the data
 			RemoveComponentData(entity);

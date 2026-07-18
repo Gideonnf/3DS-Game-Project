@@ -26,70 +26,37 @@ DigiPen Institute of Technology is prohibited.
 
 	class ComponentManager : public Singleton<ComponentManager>
 	{
-		// Look into whether it should be a singleton/extern it out as a global variable
 	private:
-		// Keep track of what is the component ID 
+		// Map for looking up component IDs by string (used during configuration/deserialization)
 		std::unordered_map<std::string, ComponentID> m_ComponentTypes;
 
-		// Keep track of the components by storing a shared pointer to the interface base class
-		// Shared pointer so that it can keep track of every new component by using the same pointer
-		// I also cant store it as a const char*, IComponent without using shared_ptr 
-		std::unordered_map<std::string, std::shared_ptr<IComponent>> m_ComponentMap;
+		// Array of component wrappers indexed by their compile-time ComponentID
+		std::array<std::shared_ptr<IComponent>, MAX_COMPONENTS> m_ComponentMap;
 
-		//std::unordered_map<std::string, std::any> mComponentRegistry;
-		//std::array<Signature, MAX_COMPONENTS> m_ComponentSignatures;
-
-		// Everytime a new component is registered, it uses this ID and increment it for the next component
-		// Use 0 as an error flag if trying to pull a component that doesn't exist
 		ComponentID m_NextID = 1;
+
 	public:
-
-        /*!*************************************************************************
-        \brief
-        	Register component into the component manager that is type T
-        
-        \tparam T 
-        ***************************************************************************/
-		template<typename T>
-		void RegisterComponent()
+		ComponentManager()
 		{
-			// Get the name of the type that was passed in for storing in the map
-			std::string name = typeid(T).name();
-
-			// if count is 1 this will fail
-			assert(m_ComponentTypes.count(name) == 0 && "Component has been registered");
-
-			// add it to the component type map
-			m_ComponentTypes.insert({ name, m_NextID });
-
-			m_NextID++;
-
-			//Insert into the component map
-			m_ComponentMap.insert({ name, std::make_shared<Component<T>>() });
-
-			// Create a lambda function that returns an instance of T 
-			// not being used atm
-			//mComponentRegistry.insert({ name, []() -> T {return T{}; } });
+			m_ComponentMap.fill(nullptr);
 		}
 
-        /*!*************************************************************************
-        \brief
-        	Get the Component ID from a template type T
-        
-        \tparam T 
-        \return ComponentID
-        	
-        ***************************************************************************/
+		template<typename T>
+		void RegisterComponent(const std::string& name)
+		{
+			ComponentID id = GetComponentTypeID<T>();
+
+			assert(id < MAX_COMPONENTS && "Exceeded maximum number of components");
+			assert(m_ComponentMap[id] == nullptr && "Component has already been registered");
+
+			m_ComponentTypes.insert({ name, id });
+			m_ComponentMap[id] = std::make_shared<Component<T>>();
+		}
+
 		template<typename T>
 		ComponentID GetComponentID()
 		{
-			// Get the name of the component using typeid
-			std::string componentName = typeid(T).name();
-
-			// Check if it exist in the map
-			assert(m_ComponentTypes.count(componentName) != 0 && "Component does not exist yet");
-
-			return m_ComponentTypes[componentName];
+			return GetComponentTypeID<T>();
 		}
 
         /*!*************************************************************************
@@ -262,23 +229,15 @@ DigiPen Institute of Technology is prohibited.
 		template<typename T>
 		std::shared_ptr<Component<T>> GetComponentArray()
 		{
-			// Get the name of the component using typeid
-			std::string componentName = typeid(T).name();
-			// Check if it exist in the map
-			if (m_ComponentTypes.count(componentName) != 0)
-			{
-				// if it does then retrieve the component
-				return std::static_pointer_cast<Component<T>>(m_ComponentMap[componentName]);
-			}
-
-			// If it reaches here then itll flag an error
-			assert(m_ComponentTypes.count(componentName) != 0 && "Component does not exist yet. ");
-			return NULL;
+			ComponentID id = GetComponentTypeID<T>();
+			assert(id < MAX_COMPONENTS && "Component ID out of bounds");
+			assert(m_ComponentMap[id] != nullptr && "Component does not exist yet");
+			return std::static_pointer_cast<Component<T>>(m_ComponentMap[id]);
 		}
 
 	};
 
 #define COMPONENTSYSTEM ComponentManager::GetInstance()
-#define REGISTER_COMPONENT(Component) ComponentManager::GetInstance()->RegisterComponent<Component>()
+#define REGISTER_COMPONENT(Component) ComponentManager::GetInstance()->RegisterComponent<Component>(#Component)
 
 #endif

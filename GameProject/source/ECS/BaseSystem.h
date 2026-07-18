@@ -14,7 +14,7 @@ class BaseSystem
 {
 public:
 	// contain a set that holds what entities it holds
-	std::set<Entity> mEntitiesSet;
+	std::vector<Entity> mEntitiesSet;
 	// Keep track of the system's signature
 	Signature mSignature;
 

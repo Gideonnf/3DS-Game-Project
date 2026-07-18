@@ -29,102 +29,59 @@ DigiPen Institute of Technology is prohibited.
 class SystemManager : public Singleton<SystemManager>
 {
 private:
-	std::unordered_map<std::string, Signature> mSystemSignatures{};
-	std::unordered_map<std::string, std::shared_ptr<BaseSystem>> mSystems{};
+	std::unordered_map<SystemID, Signature> mSystemSignatures{};
+	std::unordered_map<SystemID, std::shared_ptr<BaseSystem>> mSystems{};
 
 public:
 	template<typename T>
 	std::shared_ptr<T> RegisterSystem()
 	{
-		// Get the name of the system
-		std::string sysName = typeid(T).name();
+		SystemID id = GetSystemTypeID<T>();
 		auto system = std::make_shared<T>();
-		mSystems.insert({ sysName, system });
+		mSystems.insert({ id, system });
 		return system;
 	}
 
-        /*!*************************************************************************
-        \brief
-        	Set the Signature object
-        
-        \tparam T 
-        \param[in] sig
-        	
-        
-        ***************************************************************************/
-		template<typename T>
-		void SetSignature(Signature sig)
-		{
-			// Get the name of the system
-			std::string sysName = typeid(T).name();
+	template<typename T>
+	void SetSignature(Signature sig)
+	{
+		SystemID id = GetSystemTypeID<T>();
+		mSystemSignatures.insert({ id, sig });
+	}
 
-			mSystemSignatures.insert({ sysName, sig });
+	template<typename T>
+	void SetSignature(std::vector<const char*> componentList)
+	{
+		SystemID id = GetSystemTypeID<T>();
+
+		Signature signature;
+		for (auto const& component : componentList)
+		{
+			mSystems[id]->componentNames.push_back(component);
+			signature.set(ComponentManager::GetInstance()->GetComponentID(component), true);
 		}
 
-        /*!*************************************************************************
-        \brief
-        	Set the Signature object
-        
-        \tparam T 
-        \param[in] componentList
-        	
-        
-        ***************************************************************************/
-		template<typename T>
-		void SetSignature(std::vector<const char*> componentList)
+		mSystems[id]->mSignature = signature;
+		mSystemSignatures.insert({ id, signature });
+	}
+
+	void EntityDestroyed(Entity entity);
+
+	void UpdateSignatures(Entity entity, Signature entitySignature);
+
+	template <typename T>
+	std::shared_ptr<T> GetSystem()
+	{
+		SystemID id = GetSystemTypeID<T>();
+		if (mSystems.count(id) != 0)
 		{
-			// Get the name of the system
-			std::string sysName = typeid(T).name();
-
-			Signature signature;
-			// Loop through the vector
-			for (auto const& component : componentList)
-			{
-				mSystems[sysName]->componentNames.push_back(component);
-				// Set the signature for all the component it has
-				signature.set(ComponentManager::GetInstance()->GetComponentID(component), true);
-			}
-
-			mSystems[sysName]->mSignature = signature;
-			mSystemSignatures.insert({ sysName, signature });
+			return std::static_pointer_cast<T>(mSystems[id]);
 		}
 
-        /*!*************************************************************************
-        \brief
-        	Called when entity is destroyed
-        
-        \param[in] entity
-        	
-        
-        ***************************************************************************/
-		void EntityDestroyed(Entity entity);
-
-        /*!*************************************************************************
-        \brief
-        	Update entity's signature to all systems
-        
-        \param[in] entity
-        	
-        
-        \param[in] entitySignature
-        	
-        
-        ***************************************************************************/
-		void UpdateSignatures(Entity entity, Signature entitySignature);
-
-		template <typename T>
-		std::shared_ptr<T> GetSystem()
-		{
-			std::string systemName = typeid(T).name();
-			if (mSystems.count(systemName) != 0)
-			{
-				return std::static_pointer_cast<T>(mSystems[systemName]);
-			}
-
-			assert("System does not exist yet");
-			return NULL;
-		}
-	};
+		assert(false && "System does not exist yet");
+		return nullptr;
+	}
+};
 
 #define SYSTEM SystemManager::GetInstance()
 #define REGISTER_SYSTEM(system) SystemManager::GetInstance()->RegisterSystem<system>();
